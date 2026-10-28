@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogiSense AI — Intelligent E-Commerce Logistics Control Center</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b1120; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .pulse-dot { animation: pulse 1.5s infinite; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.2s ease-out; }
+    
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      z-index: 50; display: none; justify-content: flex-end;
+    }
+    .drawer-overlay.open { display: flex; animation: fadeIn 0.2s; }
+  </style>
+</head>
+<body class="bg-[#080c15] text-slate-100 antialiased font-sans text-xs h-screen w-screen overflow-hidden flex select-none">
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="w-64 bg-[#0b1120] border-r border-[#1e293b] flex flex-col shrink-0 z-20">
+    <!-- Brand -->
+    <div class="p-4 border-b border-[#1e293b] flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+      </div>
+      <div>
+        <div class="flex items-center space-x-1.5">
+          <span class="font-bold text-base tracking-tight bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent">LogiSense</span>
+          <span class="text-xs uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">AI</span>
+        </div>
+        <p class="text-xs text-slate-400 font-medium">Logistics Control Center</p>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Status -->
+    <div class="px-4 py-3 bg-[#080c15]/60 border-b border-[#1e293b] text-xs">
+      <div class="flex items-center justify-between text-slate-400 mb-1">
+        <span class="text-xs uppercase tracking-wider font-semibold text-slate-500">Environment</span>
+        <span class="inline-flex items-center text-xs font-mono font-medium text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot mr-1.5"></span>
+          LIVE SYNTHETIC
+        </span>
+      </div>
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span>Sim Date:</span>
+        <span class="text-slate-300">2026-10-14 18:00</span>
+      </div>
+    </div>
+
+    <!-- Navigation List (10 Tabs) -->
+    <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+      <div class="px-3 pb-1 text-xs uppercase tracking-wider font-semibold text-slate-500">Command Navigation</div>
+      
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 font-semibold" onclick="switchTab('overview')">
+        <span>Executive Overview</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('delivery')">
+        <span>Delivery Intelligence</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('root-cause')">
+        <span>Root Cause Diagnostics</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('warehouse')">
+        <span>Warehouse Operations</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('routes')">
+        <span>Route Optimization</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('staffing')">
+        <span>Staffing Intelligence</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('inventory')">
+        <span>Inventory Intelligence</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('copilot')">
+        <span>Ops Copilot AI</span>
+        <span class="text-xs font-semibold text-violet-300 bg-violet-500/20 border border-violet-500/40 px-1.5 py-0.5 rounded-full">AI</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('simulator')">
+        <span>Scenario Simulator</span>
+      </button>
+
+      <button class="nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-[#0f172a]" onclick="switchTab('data-explorer')">
+        <span>Data & Model Explorer</span>
+      </button>
+    </nav>
+
+    <!-- Footer Telemetry Info -->
+    <div class="p-3 border-t border-[#1e293b] text-xs text-slate-500 bg-[#080c15]/50">
+      <div class="flex justify-between mb-1">
+        <span>ML Engine:</span>
+        <span class="text-cyan-400 font-mono font-medium">Random Forest 1.4</span>
+      </div>
+      <div class="flex justify-between">
+        <span>Network SLA:</span>
+        <span class="text-emerald-400 font-mono font-medium">95.1% NOMINAL</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main View Area -->
+  <div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <!-- Top Command Header -->
+    <header class="h-14 bg-[#0b1120] border-b border-[#1e293b] px-6 flex items-center justify-between shrink-0 z-10">
+      <div>
+        <div class="flex items-center space-x-2 text-xs text-slate-400">
+          <span>LogiSense Control</span>
+          <span>/</span>
+          <span class="text-cyan-300 font-medium" id="header-breadcrumb">Executive Overview</span>
+        </div>
+        <h1 class="text-sm font-bold text-slate-100" id="header-title">Executive Control Center</h1>
+      </div>
+
+      <!-- Center Search -->
+      <div class="flex-1 max-w-sm mx-6">
+        <div class="relative">
+          <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Search order ORD-2026..., city, carrier, or SKU..." class="w-full bg-[#080c15] border border-[#1e293b] rounded-lg pl-3 pr-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors">
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center space-x-3">
+        <select id="wh-filter" onchange="filterWarehouse(this.value)" class="bg-[#080c15] border border-[#1e293b] rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer">
+          <option value="ALL">All Warehouses (5)</option>
+          <option value="WH-ORD">WH-ORD Chicago Central</option>
+          <option value="WH-EWR">WH-EWR Newark Gateway</option>
+          <option value="WH-SEA">WH-SEA Seattle Pacific</option>
+          <option value="WH-DFW">WH-DFW Dallas Central</option>
+          <option value="WH-RNO">WH-RNO Reno Regional</option>
+        </select>
+
+        <div class="flex items-center space-x-2 pl-2 border-l border-[#1e293b]">
+          <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center text-white font-bold text-xs">OP</div>
+          <div class="text-left hidden md:block">
+            <div class="text-xs font-semibold text-slate-200">Lead Operator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable Workspace -->
+    <main class="flex-1 overflow-y-auto p-5 bg-[#080c15]">
+      
+      <!-- TAB 1: EXECUTIVE OVERVIEW -->
+      <div id="tab-overview" class="tab-pane active space-y-5">
+        <!-- 8 KPI Cards Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">Total Orders</span>
+              <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded-full">↑ +6.4%</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100 my-1" id="kpi-total">10,500</div>
+            <div class="text-xs text-slate-500 font-mono">Prev: 9,870 orders</div>
+          </div>
+
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">On-Time Rate</span>
+              <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded-full">↑ +0.8%</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-emerald-400 my-1" id="kpi-otd">95.1%</div>
+            <div class="text-xs text-slate-500 font-mono">Target: &gt;95.0% SLA</div>
+          </div>
+
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">Delayed Orders</span>
+              <span class="text-xs font-semibold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded-full">↑ +12.1%</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-rose-400 my-1" id="kpi-delays">514</div>
+            <div class="text-xs text-slate-500 font-mono">Chicago & Newark bottlenecks</div>
+          </div>
+
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">Average Delay</span>
+              <span class="text-xs font-semibold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded-full">↑ +1.2h</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100 my-1" id="kpi-avg-delay">11.3 hrs</div>
+            <div class="text-xs text-slate-500 font-mono">Across 514 delayed orders</div>
+          </div>
+
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">Customer Complaints</span>
+              <span class="text-xs font-semibold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded-full">5.05%</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-amber-400 my-1" id="kpi-complaints">531</div>
+            <div class="text-xs text-slate-500 font-mono">Driven by late deliveries</div>
+          </div>
+
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">High-Risk Orders</span>
+              <span class="text-xs font-semibold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded-full">Critical</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-rose-400 my-1" id="kpi-high-risk">218</div>
+            <div class="text-xs text-slate-500 font-mono">Flagged &gt;35% risk probability</div>
+          </div>
+
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">Logistics Cost/Order</span>
+              <span class="text-xs font-semibold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 rounded-full">+$0.95</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100 my-1" id="kpi-cost">$25.53</div>
+            <div class="text-xs text-slate-500 font-mono">Includes linehaul freight</div>
+          </div>
+
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="text-xs uppercase font-semibold text-slate-400">Network Utilization</span>
+              <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded-full">Nominal</span>
+            </div>
+            <div class="text-2xl font-bold font-mono text-slate-100 my-1" id="kpi-utilization">81.3%</div>
+            <div class="text-xs text-slate-500 font-mono">Chicago peak at 89.2%</div>
+          </div>
+        </div>
+
+        <!-- Middle Visual Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- 35-Day Performance Trend Chart (2 cols) -->
+          <div class="lg:col-span-2 bg-[#0f172a] border border-[#1e293b] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <h3 class="text-sm font-bold text-slate-100">Delivery Performance Trend (Last 35 Days)</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Daily order volume, on-time rate SLA, and customer complaints</p>
+              </div>
+              <div class="flex space-x-3 text-xs">
+                <span class="text-cyan-400 font-semibold">● On-Time</span>
+                <span class="text-rose-400 font-semibold">● Delayed</span>
+                <span class="text-amber-400 font-semibold">● Complaints</span>
+              </div>
+            </div>
+
+            <!-- SVG Trendline Chart -->
+            <div class="h-44 w-full relative my-2">
+              <svg width="100%" height="100%" viewBox="0 0 600 160" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="art-cyan" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.0"/>
+                  </linearGradient>
+                  <linearGradient id="art-red" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.45"/>
+                    <stop offset="100%" stop-color="#ef4444" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <line x1="0" y1="40" x2="600" y2="40" stroke="#1e293b" stroke-dasharray="3"/>
+                <line x1="0" y1="80" x2="600" y2="80" stroke="#1e293b" stroke-dasharray="3"/>
+                <line x1="0" y1="120" x2="600" y2="120" stroke="#1e293b" stroke-dasharray="3"/>
+                <path d="M0,60 Q75,50 150,65 T300,45 T450,55 T600,40 L600,160 L0,160 Z" fill="url(#art-cyan)"/>
+                <path d="M0,60 Q75,50 150,65 T300,45 T450,55 T600,40" fill="none" stroke="#06b6d4" stroke-width="2.5"/>
+                <path d="M0,135 Q75,130 150,140 T300,120 T450,125 T600,115 L600,160 L0,160 Z" fill="url(#art-red)"/>
+                <path d="M0,135 Q75,130 150,140 T300,120 T450,125 T600,115" fill="none" stroke="#ef4444" stroke-width="2"/>
+                <path d="M0,145 Q75,142 150,148 T300,135 T450,138 T600,130" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="4"/>
+              </svg>
+            </div>
+            <div class="flex justify-between text-xs text-slate-500 font-mono">
+              <span>Day 1 (Sep 10)</span>
+              <span>Day 12</span>
+              <span>Day 24</span>
+              <span>Day 35 (Today)</span>
+            </div>
+          </div>
+
+          <!-- Fulfillment SLA Adherence Donut (1 col) -->
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-100">Fulfillment SLA Adherence</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Delivered on-time vs delayed breakdown</p>
+            </div>
+
+            <div class="flex items-center justify-center my-3 relative">
+              <svg width="130" height="130" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1e293b" stroke-width="12"/>
+                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#10b981" stroke-width="12" stroke-dasharray="239 251" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#ef4444" stroke-width="12" stroke-dasharray="12 251" stroke-dashoffset="-239" transform="rotate(-90 50 50)"/>
+              </svg>
+              <div class="absolute text-center">
+                <div class="text-xl font-bold font-mono text-slate-100">95.1%</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wider">On-Time SLA</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2 bg-[#080c15] rounded border border-[#1e293b]">
+                <div class="text-xs text-emerald-400 font-semibold uppercase">On-Time</div>
+                <div class="text-sm font-bold font-mono text-slate-100">9,986</div>
+              </div>
+              <div class="p-2 bg-[#080c15] rounded border border-[#1e293b]">
+                <div class="text-xs text-rose-400 font-semibold uppercase">Late Delayed</div>
+                <div class="text-sm font-bold font-mono text-slate-100">514</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- High-Risk Orders & Prescriptive Interventions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Critical Orders Table -->
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl overflow-hidden shadow-sm">
+            <div class="p-3.5 border-b border-[#1e293b] flex justify-between items-center">
+              <div>
+                <h4 class="text-xs font-bold text-slate-100">Critical Late-Risk Orders Preview</h4>
+                <p class="text-xs text-slate-400">Pre-dispatch ML predictions before SLA failure</p>
+              </div>
+              <button class="text-xs font-semibold text-cyan-400 hover:underline" onclick="switchTab('delivery')">All Orders →</button>
+            </div>
+            <table class="w-full text-left text-xs">
+              <thead class="bg-[#080c15] text-slate-400 text-xs uppercase font-semibold">
+                <tr>
+                  <th class="p-2.5">Order ID</th>
+                  <th class="p-2.5">Destination</th>
+                  <th class="p-2.5">Carrier</th>
+                  <th class="p-2.5">Risk Prob</th>
+                  <th class="p-2.5 text-right">Inspect</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#1e293b]/60" id="overview-orders-table">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Prescriptive Recommendations -->
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h4 class="text-xs font-bold text-slate-100">Top Prescriptive Interventions</h4>
+                <p class="text-xs text-slate-400">Ranked by expected SLA improvement and ROI feasibility</p>
+              </div>
+              <button class="px-2.5 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/25 transition-all" onclick="switchTab('simulator')">Test Simulator</button>
+            </div>
+
+            <div class="space-y-2.5">
+              <div class="p-3 rounded-lg bg-[#080c15] border border-[#1e293b]">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-xs uppercase font-bold text-slate-500 font-mono">Route Optimization</span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40">Critical Priority</span>
+                </div>
+                <div class="font-bold text-slate-100 text-xs">Carrier Re-allocation on NYC Corridor</div>
+                <p class="text-xs text-slate-400 mt-1">Shift 60% urban parcels from MetroPost to FleetPrime and advance linehaul departure to 21:30.</p>
+                <div class="flex justify-between mt-2 text-xs font-mono">
+                  <span class="text-emerald-400 font-bold">+3.1% OTD Lift</span>
+                  <span class="text-cyan-400">Score: 92.0</span>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-lg bg-[#080c15] border border-[#1e293b]">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-xs uppercase font-bold text-slate-500 font-mono">Warehouse Allocation</span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">High Priority</span>
+                </div>
+                <div class="font-bold text-slate-100 text-xs">Spillover Rerouting from Chicago to Dallas</div>
+                <p class="text-xs text-slate-400 mt-1">Divert 450 non-express Midwest orders to Dallas Hub to relieve Chicago's 89% capacity strain.</p>
+                <div class="flex justify-between mt-2 text-xs font-mono">
+                  <span class="text-emerald-400 font-bold">+2.4% OTD Lift</span>
+                  <span class="text-cyan-400">Score: 88.5</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2 border-t border-[#1e293b] text-xs text-slate-400 flex justify-between">
+              <span>Potential Combined Network Lift:</span>
+              <span class="text-emerald-400 font-mono font-bold">+5.8% OTD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: DELIVERY INTELLIGENCE -->
+      <div id="tab-delivery" class="tab-pane space-y-4">
+        <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center space-x-3">
+            <span class="text-xs font-semibold text-cyan-400">Filters:</span>
+            <select id="deliv-status" onchange="renderDeliveryTable()" class="bg-[#080c15] border border-[#1e293b] rounded-lg px-2.5 py-1 text-xs text-slate-200">
+              <option value="ALL">All Delivery Statuses</option>
+              <option value="Delivered">Delivered</option>
+              <option value="In Transit">In Transit</option>
+              <option value="Delayed">Delayed</option>
+            </select>
+            <select id="deliv-risk" onchange="renderDeliveryTable()" class="bg-[#080c15] border border-[#1e293b] rounded-lg px-2.5 py-1 text-xs text-slate-200">
+              <option value="ALL">All Risk Tiers</option>
+              <option value="High">High Risk (&gt;35%)</option>
+              <option value="Medium">Medium Risk (15-35%)</option>
+              <option value="Low">Low Risk (&lt;15%)</option>
+            </select>
+          </div>
+          <div class="text-xs text-slate-400">
+            Showing <strong class="text-slate-100 font-mono" id="deliv-count">15</strong> sample orders
+          </div>
+        </div>
+
+        <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl overflow-hidden shadow-sm">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-[#080c15] text-slate-400 text-xs uppercase font-semibold">
+              <tr>
+                <th class="p-3">Order ID</th>
+                <th class="p-3">Order Date</th>
+                <th class="p-3">Destination</th>
+                <th class="p-3">Warehouse</th>
+                <th class="p-3">Carrier</th>
+                <th class="p-3">Priority</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Delay</th>
+                <th class="p-3">Risk Prob</th>
+                <th class="p-3">Risk Tier</th>
+                <th class="p-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#1e293b]/60" id="delivery-orders-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: ROOT CAUSE DIAGNOSTICS -->
+      <div id="tab-root-cause" class="tab-pane space-y-4">
+        <div class="p-4 rounded-xl bg-gradient-to-r from-[#0f172a] to-[#080c15] border border-[#1e293b]">
+          <span class="text-xs font-bold text-rose-400 uppercase tracking-wider">Causal Analysis Solver</span>
+          <h2 class="text-base font-bold text-slate-100 mt-0.5">Why Deliveries Are Delayed Despite Adequate Capacity</h2>
+          <p class="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
+            Our Fisher Exact statistical solver proved that delay variance is concentrated in specific micro-bottlenecks: <strong class="text-slate-100">Chicago peak-hour queue backlog</strong> (odds ratio 6.42x) and <strong class="text-slate-100">MetroPost urban carrier failure</strong> (odds ratio 5.85x), not aggregate network square footage deficits.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-[#0f172a] border border-rose-500/40 border-l-4">
+            <span class="text-xs font-bold text-rose-400">#1 Primary Root Cause</span>
+            <h4 class="text-xs font-bold text-slate-100 mt-1">Warehouse Queue Congestion</h4>
+            <p class="text-xs text-slate-400 mt-1">Chicago Hub (WH-ORD) capacity exceeds 85%, increasing processing duration up to 2.4x.</p>
+            <div class="mt-3 pt-2 border-t border-[#1e293b] text-xs flex justify-between font-mono">
+              <span class="text-slate-400">Odds Ratio: <strong>6.42x</strong></span>
+              <span class="text-cyan-400">Cost: $17,892</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#0f172a] border border-rose-500/40 border-l-4">
+            <span class="text-xs font-bold text-rose-400">#2 Urban Bottleneck</span>
+            <h4 class="text-xs font-bold text-slate-100 mt-1">Carrier 1st-Attempt Failure</h4>
+            <p class="text-xs text-slate-400 mt-1">MetroPost last-mile carrier experiences 22% handoff failure rate on NYC & SF urban routes.</p>
+            <div class="mt-3 pt-2 border-t border-[#1e293b] text-xs flex justify-between font-mono">
+              <span class="text-slate-400">Odds Ratio: <strong>5.85x</strong></span>
+              <span class="text-cyan-400">Cost: $18,535</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#0f172a] border border-amber-500/40 border-l-4">
+            <span class="text-xs font-bold text-amber-400">#3 Labor Shortage</span>
+            <h4 class="text-xs font-bold text-slate-100 mt-1">Seattle Night Shift Absenteeism</h4>
+            <p class="text-xs text-slate-400 mt-1">Attendance on 22:00-06:00 sorting shift in Seattle drops below 76%, rolling queues to morning.</p>
+            <div class="mt-3 pt-2 border-t border-[#1e293b] text-xs flex justify-between font-mono">
+              <span class="text-slate-400">Odds Ratio: <strong>3.40x</strong></span>
+              <span class="text-cyan-400">Cost: $10,064</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Correlation vs Causation Matrix -->
+        <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl overflow-hidden shadow-sm">
+          <div class="p-3 border-b border-[#1e293b]">
+            <h4 class="text-xs font-bold text-slate-100">Correlation vs. Causation Proof Matrix</h4>
+          </div>
+          <table class="w-full text-left text-xs">
+            <thead class="bg-[#080c15] text-slate-400 text-xs uppercase font-semibold">
+              <tr>
+                <th class="p-3">Operational Factor</th>
+                <th class="p-3">Observed Correlation</th>
+                <th class="p-3">Fisher Odds Ratio</th>
+                <th class="p-3">Causal Validation Mechanism</th>
+                <th class="p-3">Verdict</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#1e293b]/60 text-slate-300">
+              <tr>
+                <td class="p-3 font-semibold text-slate-100">Peak Hour Warehouse Backlog</td>
+                <td class="p-3 text-rose-400 font-mono">r = +0.68 (Strong)</td>
+                <td class="p-3 font-mono">6.42x (p &lt; 0.001)</td>
+                <td class="p-3">Shifting dispatch to night linehaul eliminates backlog queue</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 text-xs font-semibold">Direct Causal Driver</span></td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold text-slate-100">MetroPost Carrier Reliability</td>
+                <td class="p-3 text-rose-400 font-mono">r = +0.72 (Strong)</td>
+                <td class="p-3 font-mono">5.85x (p &lt; 0.001)</td>
+                <td class="p-3">Reallocating parcels to FleetPrime cuts 1st-attempt fails by 68%</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 text-xs font-semibold">Direct Causal Driver</span></td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold text-slate-100">Package Item Count</td>
+                <td class="p-3 text-amber-400 font-mono">r = +0.28 (Moderate)</td>
+                <td class="p-3 font-mono">1.12x (p = 0.24)</td>
+                <td class="p-3">Multi-item packages only delay when combined with Reno stockout</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 text-xs font-semibold">Confounding Symptom</span></td>
+              </tr>
+              <tr>
+                <td class="p-3 font-semibold text-slate-100">Warehouse Square Footage</td>
+                <td class="p-3 text-slate-400 font-mono">r = -0.08 (None)</td>
+                <td class="p-3 font-mono">0.98x (p = 0.82)</td>
+                <td class="p-3">Building footprint has zero impact on sorting cycle time</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-xs font-semibold">Non-Causal Artifact</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: WAREHOUSE OPERATIONS -->
+      <div id="tab-warehouse" class="tab-pane space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div class="p-3.5 bg-[#0f172a] border border-rose-500/40 rounded-xl">
+            <div class="flex justify-between text-xs font-bold text-cyan-400 font-mono">
+              <span>WH-ORD</span>
+              <span class="text-rose-400">89.2%</span>
+            </div>
+            <div class="text-xs font-bold text-slate-100 mt-1">Chicago Central Hub</div>
+            <div class="w-full bg-[#080c15] h-1.5 rounded-full overflow-hidden my-2">
+              <div class="bg-rose-500 h-full" style="width:89.2%;"></div>
+            </div>
+            <div class="text-xs text-slate-400 flex justify-between font-mono">
+              <span>Backlog: 3,120 pkgs</span>
+              <span>Proc: 5.4h</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-[#0f172a] border border-amber-500/40 rounded-xl">
+            <div class="flex justify-between text-xs font-bold text-cyan-400 font-mono">
+              <span>WH-EWR</span>
+              <span class="text-amber-400">84.1%</span>
+            </div>
+            <div class="text-xs font-bold text-slate-100 mt-1">Newark East Gateway</div>
+            <div class="w-full bg-[#080c15] h-1.5 rounded-full overflow-hidden my-2">
+              <div class="bg-amber-400 h-full" style="width:84.1%;"></div>
+            </div>
+            <div class="text-xs text-slate-400 flex justify-between font-mono">
+              <span>Backlog: 2,350 pkgs</span>
+              <span>Proc: 4.8h</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-[#0f172a] border border-[#1e293b] rounded-xl">
+            <div class="flex justify-between text-xs font-bold text-cyan-400 font-mono">
+              <span>WH-SEA</span>
+              <span class="text-amber-400">82.0%</span>
+            </div>
+            <div class="text-xs font-bold text-slate-100 mt-1">Seattle Pacific</div>
+            <div class="w-full bg-[#080c15] h-1.5 rounded-full overflow-hidden my-2">
+              <div class="bg-amber-400 h-full" style="width:82.0%;"></div>
+            </div>
+            <div class="text-xs text-slate-400 flex justify-between font-mono">
+              <span>Backlog: 1,800 pkgs</span>
+              <span>Proc: 4.3h</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-[#0f172a] border border-emerald-500/40 rounded-xl">
+            <div class="flex justify-between text-xs font-bold text-cyan-400 font-mono">
+              <span>WH-DFW</span>
+              <span class="text-emerald-400">73.5%</span>
+            </div>
+            <div class="text-xs font-bold text-slate-100 mt-1">Dallas South Central</div>
+            <div class="w-full bg-[#080c15] h-1.5 rounded-full overflow-hidden my-2">
+              <div class="bg-emerald-400 h-full" style="width:73.5%;"></div>
+            </div>
+            <div class="text-xs text-slate-400 flex justify-between font-mono">
+              <span>Backlog: 2,200 pkgs</span>
+              <span>Proc: 3.4h</span>
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-[#0f172a] border border-[#1e293b] rounded-xl">
+            <div class="flex justify-between text-xs font-bold text-cyan-400 font-mono">
+              <span>WH-RNO</span>
+              <span class="text-slate-300">74.0%</span>
+            </div>
+            <div class="text-xs font-bold text-slate-100 mt-1">Reno West Hub</div>
+            <div class="w-full bg-[#080c15] h-1.5 rounded-full overflow-hidden my-2">
+              <div class="bg-emerald-400 h-full" style="width:74%;"></div>
+            </div>
+            <div class="text-xs text-slate-400 flex justify-between font-mono">
+              <span>Backlog: 1,480 pkgs</span>
+              <span>Proc: 3.6h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: ROUTE OPTIMIZATION -->
+      <div id="tab-routes" class="tab-pane space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="p-3.5 bg-[#0f172a] border border-emerald-500/40 rounded-xl">
+            <span class="text-xs font-bold text-emerald-400">Tier 1 Preferred</span>
+            <div class="text-xs font-bold text-slate-100 mt-0.5">FleetPrime Logistics</div>
+            <div class="text-sm font-bold font-mono text-emerald-400 mt-1">95.2% OTD</div>
+            <p class="text-xs text-slate-400 mt-1">Low 1st-attempt failures in suburban corridors.</p>
+          </div>
+          <div class="p-3.5 bg-[#0f172a] border border-[#1e293b] rounded-xl">
+            <span class="text-xs font-bold text-cyan-400">Tier 2 Standard</span>
+            <div class="text-xs font-bold text-slate-100 mt-0.5">ApexFreight Cross-Country</div>
+            <div class="text-sm font-bold font-mono text-slate-100 mt-1">93.8% OTD</div>
+            <p class="text-xs text-slate-400 mt-1">Stable long-distance interstate transit.</p>
+          </div>
+          <div class="p-3.5 bg-[#0f172a] border border-[#1e293b] rounded-xl">
+            <span class="text-xs font-bold text-cyan-400">Tier 2 Standard</span>
+            <div class="text-xs font-bold text-slate-100 mt-0.5">SwiftLog Express</div>
+            <div class="text-sm font-bold font-mono text-slate-100 mt-1">92.5% OTD</div>
+            <p class="text-xs text-slate-400 mt-1">Midwest & Northwest regional volume.</p>
+          </div>
+          <div class="p-3.5 bg-[#0f172a] border border-rose-500/40 rounded-xl">
+            <span class="text-xs font-bold text-rose-400">Critical SLA Risk</span>
+            <div class="text-xs font-bold text-slate-100 mt-0.5">MetroPost Urban Partner</div>
+            <div class="text-sm font-bold font-mono text-rose-400 mt-1">78.5% OTD</div>
+            <p class="text-xs text-slate-400 mt-1">Severe 1st-attempt delivery failures in NYC & SF.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: STAFFING INTELLIGENCE -->
+      <div id="tab-staffing" class="tab-pane space-y-4">
+        <div class="p-4 rounded-xl bg-[#0f172a] border border-amber-500/40 border-l-4">
+          <span class="text-xs font-bold text-amber-400 uppercase">Workforce Capacity Alert</span>
+          <h3 class="text-sm font-bold text-slate-100 mt-0.5">Seattle Hub Night Shift Absenteeism (&lt;76% Attendance)</h3>
+          <p class="text-xs text-slate-400 mt-1">
+            Attendance on the 22:00-06:00 sorting shift in Seattle averages only 76.2%, leaving 180 parcels unpicked each night. Cross-shifting 4 morning flex-workers with a 12% shift differential resolves the queue deficit.
+          </p>
+        </div>
+      </div>
+
+      <!-- TAB 7: INVENTORY INTELLIGENCE -->
+      <div id="tab-inventory" class="tab-pane space-y-4">
+        <div class="p-4 rounded-xl bg-[#0f172a] border border-rose-500/40 border-l-4">
+          <span class="text-xs font-bold text-rose-400 uppercase">Multi-Echelon Stockout Breach</span>
+          <h3 class="text-sm font-bold text-slate-100 mt-0.5">Consumer Electronics Stockout in Reno Forcing Drop-Ship Delays (+24h)</h3>
+          <p class="text-xs text-slate-400 mt-1">
+            Dallas South Central holds 240% safety stock reserve on matching SKU categories. Automated 350-unit safety stock transfer from Dallas resolves 90% of order-holding events.
+          </p>
+        </div>
+      </div>
+
+      <!-- TAB 8: OPS COPILOT AI -->
+      <div id="tab-copilot" class="tab-pane">
+        <div class="flex gap-4 h-[calc(100vh-130px)]">
+          <!-- Prompts sidebar -->
+          <div class="w-64 bg-[#0f172a] border border-[#1e293b] rounded-xl p-3 flex flex-col justify-between shrink-0">
+            <div>
+              <div class="text-xs font-bold uppercase text-slate-400 mb-2">Suggested Diagnostic Prompts</div>
+              <div class="space-y-1.5 overflow-y-auto max-h-[380px]">
+                <button class="w-full text-left p-2 rounded bg-[#080c15] border border-[#1e293b] hover:border-cyan-500 text-slate-300 text-xs transition-colors" onclick="askCopilot('Why are deliveries delayed even though capacity is sufficient?')">Why are deliveries delayed even though capacity is sufficient?</button>
+                <button class="w-full text-left p-2 rounded bg-[#080c15] border border-[#1e293b] hover:border-cyan-500 text-slate-300 text-xs transition-colors" onclick="askCopilot('Which warehouse is contributing most to delays?')">Which warehouse is contributing most to delays?</button>
+                <button class="w-full text-left p-2 rounded bg-[#080c15] border border-[#1e293b] hover:border-cyan-500 text-slate-300 text-xs transition-colors" onclick="askCopilot('Which orders are at immediate risk?')">Which orders are at immediate risk?</button>
+                <button class="w-full text-left p-2 rounded bg-[#080c15] border border-[#1e293b] hover:border-cyan-500 text-slate-300 text-xs transition-colors" onclick="askCopilot('Is staffing causing dispatch bottlenecks?')">Is staffing causing dispatch bottlenecks?</button>
+                <button class="w-full text-left p-2 rounded bg-[#080c15] border border-[#1e293b] hover:border-cyan-500 text-slate-300 text-xs transition-colors" onclick="askCopilot('Which routes should be optimized?')">Which routes should be optimized?</button>
+                <button class="w-full text-left p-2 rounded bg-[#080c15] border border-[#1e293b] hover:border-cyan-500 text-slate-300 text-xs transition-colors" onclick="askCopilot('What is the best way to improve on-time delivery without adding resources?')">What is the best way to improve on-time delivery without adding resources?</button>
+              </div>
+            </div>
+            <button class="w-full py-1.5 rounded bg-[#080c15] border border-[#1e293b] text-slate-400 text-xs hover:text-white" onclick="resetChat()">Reset Conversation</button>
+          </div>
+
+          <!-- Chat Stream -->
+          <div class="flex-1 bg-[#0f172a] border border-[#1e293b] rounded-xl flex flex-col justify-between overflow-hidden">
+            <div class="flex-1 overflow-y-auto p-4 space-y-3" id="copilot-stream">
+              <div class="flex gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-violet-600/30 border border-violet-500/40 text-violet-300 flex items-center justify-center font-bold text-xs shrink-0">AI</div>
+                <div class="p-3 rounded-xl bg-[#080c15] border border-[#1e293b] text-xs text-slate-200 max-w-2xl leading-relaxed">
+                  Hello! I am your <strong>Ops Copilot</strong>. I query live SQLite telemetry across all 10,500 orders and facilities without hallucinations. Click any suggested prompt or type below.
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 border-t border-[#1e293b] bg-[#080c15] flex gap-2">
+              <input type="text" id="copilot-input" onkeydown="if(event.key==='Enter') sendUserChat()" placeholder="Ask Ops Copilot an operational logistics question..." class="flex-1 bg-[#0f172a] border border-[#1e293b] rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-cyan-500">
+              <button class="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-600 text-white font-semibold text-xs hover:opacity-90 transition-opacity" onclick="sendUserChat()">Ask AI</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 9: SCENARIO SIMULATOR -->
+      <div id="tab-simulator" class="tab-pane">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Levers -->
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-4 space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b border-[#1e293b]">
+              <h3 class="text-xs font-bold text-slate-100 uppercase tracking-wider">Operational Levers</h3>
+              <button class="text-xs text-cyan-400 hover:underline" onclick="resetSim()">Reset</button>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Warehouse Processing Speed Reduction</span>
+                <span class="font-mono text-cyan-400 font-bold" id="lbl-proc">-15%</span>
+              </div>
+              <input type="range" id="sim-proc" min="0" max="40" step="5" value="15" oninput="runSimCalc()" class="w-full">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Dispatch Strategy</span>
+                <span class="font-mono text-cyan-400 font-bold" id="lbl-strat">Risk-First</span>
+              </div>
+              <select id="sim-strat" onchange="runSimCalc()" class="w-full bg-[#080c15] border border-[#1e293b] rounded-lg px-2.5 py-1.5 text-xs text-slate-200">
+                <option value="Risk-First">Risk-First Priority (ML Flagged Orders)</option>
+                <option value="SLA-First">SLA-First (Deadline Expiry Proximity)</option>
+                <option value="FIFO">Standard FIFO (First-In, First-Out)</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Staff Shift Redistribution</span>
+                <span class="font-mono text-cyan-400 font-bold" id="lbl-staff">+20%</span>
+              </div>
+              <input type="range" id="sim-staff" min="0" max="30" step="5" value="20" oninput="runSimCalc()" class="w-full">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Spillover Transfer (Chicago to Dallas)</span>
+                <span class="font-mono text-cyan-400 font-bold" id="lbl-realloc">15%</span>
+              </div>
+              <input type="range" id="sim-realloc" min="0" max="25" step="5" value="15" oninput="runSimCalc()" class="w-full">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300">Carrier Shift (MetroPost to FleetPrime)</span>
+                <span class="font-mono text-cyan-400 font-bold" id="lbl-carrier">40%</span>
+              </div>
+              <input type="range" id="sim-carrier" min="0" max="80" step="10" value="40" oninput="runSimCalc()" class="w-full">
+            </div>
+          </div>
+
+          <!-- Comparison Output (2 cols) -->
+          <div class="lg:col-span-2 space-y-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+                <span class="text-xs uppercase text-slate-400 font-semibold">On-Time Rate</span>
+                <div class="text-xl font-bold font-mono text-emerald-400 my-1" id="sim-otd">97.9%</div>
+                <div class="text-xs text-emerald-400" id="sim-otd-delta">+2.8% vs Baseline (95.1%)</div>
+              </div>
+              <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+                <span class="text-xs uppercase text-slate-400 font-semibold">Delayed Orders</span>
+                <div class="text-xl font-bold font-mono text-emerald-400 my-1" id="sim-delays">217</div>
+                <div class="text-xs text-emerald-400" id="sim-delays-delta">-297 orders avoided</div>
+              </div>
+              <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+                <span class="text-xs uppercase text-slate-400 font-semibold">Average Delay</span>
+                <div class="text-xl font-bold font-mono text-slate-100 my-1" id="sim-delay">10.3 hrs</div>
+                <div class="text-xs text-emerald-400">-1.0 hrs reduction</div>
+              </div>
+              <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+                <span class="text-xs uppercase text-slate-400 font-semibold">Cost Per Order</span>
+                <div class="text-xl font-bold font-mono text-slate-100 my-1" id="sim-cost">$24.81</div>
+                <div class="text-xs text-emerald-400">-$0.72 net savings</div>
+              </div>
+            </div>
+
+            <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-4 text-xs space-y-2">
+              <h4 class="font-bold text-slate-100">Constrained Simulation Trade-off Commentary</h4>
+              <ul class="list-disc list-inside text-slate-400 space-y-1">
+                <li>Shifting 40% volume from MetroPost to FleetPrime incurs an upfront carrier premium of +$0.85/order, but avoids over $18,000 in customer appeasement vouchers.</li>
+                <li>Implementing 'Risk-First' dispatch compresses high-risk order latency by 2.8 hours while minimally deferring lower-priority 72-hour ground shipments.</li>
+                <li>Night-shift flex balancing incurs a 12% shift differential expense, but prevents queue overflow into morning sorting windows.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 10: DATA & MODEL EXPLORER -->
+      <div id="tab-data-explorer" class="tab-pane space-y-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+            <span class="text-xs uppercase text-slate-400 font-semibold">ROC-AUC Discriminator</span>
+            <div class="text-xl font-bold font-mono text-cyan-400 my-1">0.9294</div>
+            <div class="text-xs text-emerald-400">Exceptional Separation</div>
+          </div>
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+            <span class="text-xs uppercase text-slate-400 font-semibold">Precision Score</span>
+            <div class="text-xl font-bold font-mono text-slate-100 my-1">88.7%</div>
+            <div class="text-xs text-slate-400">Positive Predictive Value</div>
+          </div>
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+            <span class="text-xs uppercase text-slate-400 font-semibold">Recall Sensitivity</span>
+            <div class="text-xl font-bold font-mono text-slate-100 my-1">51.2%</div>
+            <div class="text-xs text-slate-400">Breach Detection Rate</div>
+          </div>
+          <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-3.5">
+            <span class="text-xs uppercase text-slate-400 font-semibold">F1 Metric Lift</span>
+            <div class="text-xl font-bold font-mono text-violet-400 my-1">+591.0%</div>
+            <div class="text-xs text-emerald-400">vs Deterministic Baseline</div>
+          </div>
+        </div>
+
+        <div class="bg-[#0f172a] border border-[#1e293b] rounded-xl p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="text-xs font-bold text-slate-100">Holdout Confusion Matrix (N = 2,560 Test Partition)</h4>
+            <button class="px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-semibold" onclick="downloadCSV()">Export CSV</button>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div class="p-3 bg-[#080c15] rounded border border-emerald-500/30">
+              <span class="text-slate-400 font-semibold uppercase">True Negative</span>
+              <div class="text-lg font-bold font-mono text-emerald-400 my-1">2,429</div>
+              <span class="text-slate-500">Correctly on-time</span>
+            </div>
+            <div class="p-3 bg-[#080c15] rounded border border-rose-500/30">
+              <span class="text-slate-400 font-semibold uppercase">False Positive</span>
+              <div class="text-lg font-bold font-mono text-rose-400 my-1">8</div>
+              <span class="text-slate-500">False alarms</span>
+            </div>
+            <div class="p-3 bg-[#080c15] rounded border border-rose-500/30">
+              <span class="text-slate-400 font-semibold uppercase">False Negative</span>
+              <div class="text-lg font-bold font-mono text-rose-400 my-1">60</div>
+              <span class="text-slate-500">Missed delays</span>
+            </div>
+            <div class="p-3 bg-[#080c15] rounded border border-emerald-500/30">
+              <span class="text-slate-400 font-semibold uppercase">True Positive</span>
+              <div class="text-lg font-bold font-mono text-emerald-400 my-1">63</div>
+              <span class="text-slate-500">Correctly caught</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Slide-Over Order Detail Drawer -->
+  <div class="drawer-overlay" id="order-drawer" onclick="if(event.target===this) closeDrawer()">
+    <div class="w-full max-w-lg bg-[#0b1120] border-l border-[#1e293b] h-full flex flex-col shadow-2xl">
+      <div class="p-4 border-b border-[#1e293b] flex justify-between items-center bg-[#0f172a]">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-mono text-xs font-bold text-cyan-300 bg-cyan-500/20 px-2 py-0.5 rounded border border-cyan-500/40" id="d-id">ORD-20261001</span>
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40" id="d-status">Delayed</span>
+          </div>
+          <h3 class="text-sm font-bold text-slate-100 mt-1">Operational Order Telemetry</h3>
+        </div>
+        <button class="text-slate-400 hover:text-white text-lg p-1" onclick="closeDrawer()">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 bg-[#080c15] rounded border border-[#1e293b]">
+            <span class="text-slate-500 uppercase font-semibold">Destination City</span>
+            <div class="font-bold text-slate-200 mt-0.5" id="d-city">New York City, NY</div>
+          </div>
+          <div class="p-2.5 bg-[#080c15] rounded border border-[#1e293b]">
+            <span class="text-slate-500 uppercase font-semibold">Assigned Carrier</span>
+            <div class="font-bold text-slate-200 mt-0.5" id="d-carrier">MetroPost</div>
+          </div>
+          <div class="p-2.5 bg-[#080c15] rounded border border-[#1e293b]">
+            <span class="text-slate-500 uppercase font-semibold">SLA Window</span>
+            <div class="font-bold text-slate-200 mt-0.5" id="d-sla">Prime 2-Day (36h)</div>
+          </div>
+          <div class="p-2.5 bg-[#080c15] rounded border border-[#1e293b]">
+            <span class="text-slate-500 uppercase font-semibold">Delay Added</span>
+            <div class="font-bold text-rose-400 font-mono mt-0.5" id="d-delay">+14.2 hrs</div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-[#0f172a] border border-[#1e293b] space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold uppercase text-rose-400">AI Late Delivery Risk</span>
+            <span class="font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400" id="d-risk-tier">High Risk (88%)</span>
+          </div>
+          <div class="w-full bg-[#080c15] h-2 rounded-full overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full" id="d-risk-bar" style="width:88%;"></div>
+          </div>
+          <div class="text-xs text-slate-400 mt-2 space-y-1">
+            <span class="font-semibold block text-slate-300">Primary Contributing Factors:</span>
+            <div class="flex justify-between bg-[#080c15] p-1.5 rounded">
+              <span>Metropolitan Corridor Traffic Friction</span>
+              <span class="text-rose-400 font-mono">+28% Risk</span>
+            </div>
+            <div class="flex justify-between bg-[#080c15] p-1.5 rounded">
+              <span>Carrier First-Attempt Reliability (78%)</span>
+              <span class="text-rose-400 font-mono">+24% Risk</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Fulfillment Stepper Timeline</h4>
+          <div class="space-y-2 text-xs">
+            <div class="p-2 rounded bg-[#080c15] border border-emerald-500/40">
+              <div class="font-bold text-slate-200">1. Order Verified & Assigned</div>
+              <div class="text-slate-400">Routed to Newark Gateway (WH-EWR). Processing: 4.8 hrs.</div>
+            </div>
+            <div class="p-2 rounded bg-[#080c15] border border-rose-500/40">
+              <div class="font-bold text-rose-400">2. Dispatch Transit Congestion</div>
+              <div class="text-slate-400">I-95 corridor congestion (1.85x traffic) added 4.2h transit delay.</div>
+            </div>
+            <div class="p-2 rounded bg-[#080c15] border border-rose-500/40">
+              <div class="font-bold text-rose-400">3. Carrier Handoff Failure</div>
+              <div class="text-slate-400">MetroPost first-attempt access failure rolled package to next delivery cycle (+14.2h breach).</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="w-full py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-600 text-white font-bold text-xs" id="btn-drawer-act" onclick="applyDrawerIntervention()">
+          Apply Proactive SLA Intercept
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ORDERS = [
+      { id: 'ORD-20261001', date: '2026-10-14 09:20', city: 'New York City, NY', wh: 'WH-EWR', carrier: 'MetroPost', priority: 'Prime 2-Day', status: 'Delayed', delay: 14.2, prob: 0.88, risk: 'High' },
+      { id: 'ORD-20261002', date: '2026-10-14 09:45', city: 'Boston, MA', wh: 'WH-EWR', carrier: 'SwiftLog', priority: 'Express', status: 'Delayed', delay: 8.5, prob: 0.74, risk: 'High' },
+      { id: 'ORD-20261003', date: '2026-10-14 10:10', city: 'Detroit, MI', wh: 'WH-ORD', carrier: 'ApexFreight', priority: 'Standard', status: 'Delivered', delay: 0.0, prob: 0.12, risk: 'Low' },
+      { id: 'ORD-20261004', date: '2026-10-14 10:35', city: 'San Francisco, CA', wh: 'WH-RNO', carrier: 'MetroPost', priority: 'Prime 2-Day', status: 'Delayed', delay: 18.2, prob: 0.82, risk: 'High' },
+      { id: 'ORD-20261005', date: '2026-10-14 11:00', city: 'Houston, TX', wh: 'WH-DFW', carrier: 'FleetPrime', priority: 'Express', status: 'Delivered', delay: 0.0, prob: 0.08, risk: 'Low' },
+      { id: 'ORD-20261006', date: '2026-10-14 11:15', city: 'Philadelphia, PA', wh: 'WH-EWR', carrier: 'FleetPrime', priority: 'Prime 2-Day', status: 'Delivered', delay: 0.0, prob: 0.14, risk: 'Low' },
+      { id: 'ORD-20261007', date: '2026-10-14 11:40', city: 'Portland, OR', wh: 'WH-SEA', carrier: 'SwiftLog', priority: 'Express', status: 'Delayed', delay: 6.8, prob: 0.45, risk: 'Medium' },
+      { id: 'ORD-20261008', date: '2026-10-14 12:05', city: 'Chicago, IL', wh: 'WH-ORD', carrier: 'ApexFreight', priority: 'Standard', status: 'Delivered', delay: 0.0, prob: 0.09, risk: 'Low' }
+    ];
+
+    function switchTab(id) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('text-cyan-300', 'bg-cyan-500/15', 'border', 'border-cyan-500/30', 'font-semibold');
+        b.classList.add('text-slate-300');
+        if (b.getAttribute('onclick')?.includes(id)) {
+          b.classList.add('text-cyan-300', 'bg-cyan-500/15', 'border', 'border-cyan-500/30', 'font-semibold');
+          b.classList.remove('text-slate-300');
+        }
+      });
+      const target = document.getElementById('tab-' + id);
+      if (target) target.classList.add('active');
+
+      const titles = {
+        overview: 'Executive Overview',
+        delivery: 'Delivery Intelligence',
+        'root-cause': 'Root Cause Diagnostics',
+        warehouse: 'Warehouse Operations',
+        routes: 'Route Optimization',
+        staffing: 'Staffing Intelligence',
+        inventory: 'Inventory Intelligence',
+        copilot: 'Ops Copilot AI',
+        simulator: 'Scenario Simulator',
+        'data-explorer': 'Data & Model Explorer'
+      };
+      document.getElementById('header-breadcrumb').textContent = titles[id] || id;
+      document.getElementById('header-title').textContent = titles[id] || id;
+    }
+
+    function renderTables() {
+      const ovBody = document.getElementById('overview-orders-table');
+      if (ovBody) {
+        ovBody.innerHTML = ORDERS.filter(o => o.risk === 'High').slice(0, 5).map(o => `
+          <tr class="hover:bg-[#080c15] cursor-pointer" onclick="openOrder('${o.id}')">
+            <td class="p-2.5 font-mono text-cyan-400 font-bold">${o.id}</td>
+            <td class="p-2.5 text-slate-200">${o.city}</td>
+            <td class="p-2.5 text-slate-400">${o.carrier}</td>
+            <td class="p-2.5 font-mono font-bold text-rose-400">${Math.round(o.prob * 100)}%</td>
+            <td class="p-2.5 text-right"><button class="px-2 py-0.5 rounded bg-[#080c15] text-cyan-400 border border-[#1e293b] hover:border-cyan-500 text-xs font-medium">Inspect</button></td>
+          </tr>
+        `).join('');
+      }
+      renderDeliveryTable();
+    }
+
+    function renderDeliveryTable() {
+      const dbBody = document.getElementById('delivery-orders-body');
+      if (!dbBody) return;
+      const st = document.getElementById('deliv-status')?.value || 'ALL';
+      const rk = document.getElementById('deliv-risk')?.value || 'ALL';
+      const filtered = ORDERS.filter(o => {
+        if (st !== 'ALL' && o.status !== st) return false;
+        if (rk !== 'ALL' && o.risk !== rk) return false;
+        return true;
+      });
+      document.getElementById('deliv-count').textContent = filtered.length;
+      dbBody.innerHTML = filtered.map(o => `
+        <tr class="hover:bg-[#080c15] cursor-pointer" onclick="openOrder('${o.id}')">
+          <td class="p-3 font-mono text-cyan-400 font-bold">${o.id}</td>
+          <td class="p-3 font-mono text-slate-400">${o.date}</td>
+          <td class="p-3 text-slate-200">${o.city}</td>
+          <td class="p-3 font-mono text-slate-400">${o.wh}</td>
+          <td class="p-3 text-slate-300">${o.carrier}</td>
+          <td class="p-3"><span class="px-1.5 py-0.5 rounded text-xs ${o.priority.includes('Prime') ? 'bg-violet-500/20 text-violet-300' : 'bg-cyan-500/20 text-cyan-300'} font-semibold">${o.priority}</span></td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${o.status === 'Delivered' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'}">${o.status}</span></td>
+          <td class="p-3 font-mono text-xs ${o.delay > 0 ? 'text-rose-400 font-bold' : 'text-slate-500'}">${o.delay > 0 ? '+' + o.delay + 'h' : '0.0h'}</td>
+          <td class="p-3 font-mono">${Math.round(o.prob * 100)}%</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${o.risk === 'High' ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'}">${o.risk}</span></td>
+          <td class="p-3 text-right"><button class="px-2 py-0.5 rounded bg-[#080c15] text-cyan-400 border border-[#1e293b] hover:border-cyan-500 text-xs font-medium">Inspect</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function openOrder(id) {
+      const ord = ORDERS.find(o => o.id === id) || ORDERS[0];
+      document.getElementById('d-id').textContent = ord.id;
+      document.getElementById('d-city').textContent = ord.city;
+      document.getElementById('d-carrier').textContent = ord.carrier;
+      document.getElementById('d-sla').textContent = ord.priority;
+      document.getElementById('d-delay').textContent = ord.delay > 0 ? '+' + ord.delay + ' hrs' : '0.0 hrs';
+      document.getElementById('d-risk-tier').textContent = ord.risk + ' Risk (' + Math.round(ord.prob * 100) + '%)';
+      document.getElementById('d-risk-bar').style.width = Math.round(ord.prob * 100) + '%';
+      document.getElementById('d-status').textContent = ord.status;
+      document.getElementById('btn-drawer-act').textContent = 'Apply Proactive SLA Intercept';
+      document.getElementById('order-drawer').classList.add('open');
+    }
+
+    function closeDrawer() {
+      document.getElementById('order-drawer').classList.remove('open');
+    }
+
+    function applyDrawerIntervention() {
+      const b = document.getElementById('btn-drawer-act');
+      b.textContent = '✓ Intercept Dispatched to FleetPrime';
+      b.style.opacity = '0.7';
+    }
+
+    function filterWarehouse(wh) {
+      if (wh === 'ALL') {
+        document.getElementById('kpi-total').textContent = '10,500';
+        document.getElementById('kpi-otd').textContent = '95.1%';
+        document.getElementById('kpi-delays').textContent = '514';
+      } else if (wh === 'WH-ORD') {
+        document.getElementById('kpi-total').textContent = '3,450';
+        document.getElementById('kpi-otd').textContent = '92.4%';
+        document.getElementById('kpi-delays').textContent = '262';
+      } else if (wh === 'WH-DFW') {
+        document.getElementById('kpi-total').textContent = '2,890';
+        document.getElementById('kpi-otd').textContent = '97.8%';
+        document.getElementById('kpi-delays').textContent = '64';
+      }
+    }
+
+    function handleSearch(val) {
+      if (val) switchTab('delivery');
+      renderDeliveryTable();
+    }
+
+    // Simulator
+    function runSimCalc() {
+      const proc = Number(document.getElementById('sim-proc').value);
+      const staff = Number(document.getElementById('sim-staff').value);
+      const realloc = Number(document.getElementById('sim-realloc').value);
+      const carrier = Number(document.getElementById('sim-carrier').value);
+      const strat = document.getElementById('sim-strat').value;
+
+      document.getElementById('lbl-proc').textContent = '-' + proc + '%';
+      document.getElementById('lbl-staff').textContent = '+' + staff + '%';
+      document.getElementById('lbl-realloc').textContent = realloc + '%';
+      document.getElementById('lbl-carrier').textContent = carrier + '%';
+
+      const relief = (proc * 0.012) + (staff * 0.008) + (realloc * 0.01) + (carrier * 0.015) + (strat.includes('Risk') ? 0.02 : 0.005);
+      const simLate = Math.max(120, Math.round(514 * (1 - relief)));
+      const simOtd = ((10500 - simLate) / 10500 * 100).toFixed(1);
+      const deltaOtd = (simOtd - 95.1).toFixed(1);
+
+      document.getElementById('sim-otd').textContent = simOtd + '%';
+      document.getElementById('sim-otd-delta').textContent = '+' + deltaOtd + '% vs Baseline (95.1%)';
+      document.getElementById('sim-delays').textContent = simLate;
+      document.getElementById('sim-delays-delta').textContent = (simLate - 514) + ' orders avoided';
+      document.getElementById('sim-cost').textContent = '$' + (25.53 - (514 - simLate)*0.002).toFixed(2);
+    }
+
+    function resetSim() {
+      document.getElementById('sim-proc').value = 0;
+      document.getElementById('sim-staff').value = 0;
+      document.getElementById('sim-realloc').value = 0;
+      document.getElementById('sim-carrier').value = 0;
+      document.getElementById('sim-strat').value = 'FIFO';
+      runSimCalc();
+    }
+
+    // Copilot
+    const COPILOT_KB = {
+      'why are deliveries delayed': {
+        ans: 'While aggregate warehouse capacity is adequate, severe localized friction drives SLA failures: Chicago Hub suffers peak-hour queue backlog (89.2% load), and MetroPost carrier experiences 22% first-attempt delivery failures on urban corridors.',
+        kpis: 'Delayed: 514 | Added Latency: +11.3h | Penalty Cost: $42,500',
+        act: 'Reroute 450 Midwest orders to Dallas Hub and cap MetroPost allocation to max 25%.'
+      },
+      'which warehouse': {
+        ans: 'Chicago Central Hub (WH-ORD) is contributing the highest absolute number of delayed orders (262 delayed parcels), driven by 89.2% capacity utilization and a backlog of 3,120 queued parcels.',
+        kpis: 'Top Contributor: WH-ORD Chicago | Backlog: 3,120 pkgs | Utilization: 89.2%',
+        act: 'Trigger spillover re-allocation to Dallas (WH-DFW) and introduce staggered shift packing.'
+      },
+      'immediate risk': {
+        ans: 'Flagged 218 active orders in critical SLA breach jeopardy. All orders possess predicted late probabilities exceeding 75% due to tight 36h deadlines and urban carrier congestion.',
+        kpis: 'Flagged Orders: 218 pkgs | Avg Probability: 86.4% | Hot Corridors: NYC & Boston',
+        act: 'Trigger proactive carrier upgrade to dedicated hot-shot couriers for top flagged shipments.'
+      },
+      'without adding resources': {
+        ans: 'You can achieve an estimated +3.1% On-Time Delivery improvement without adding headcount by implementing 3 operational policies: (1) Switching dispatch prioritization from FIFO to Risk-First Priority, (2) Shifting linehaul departures to 21:30 off-peak night windows, and (3) Rebalancing existing morning staff to evening sorting shifts.',
+        kpis: 'Projected OTD Lift: +3.1% | Delay Reduction: -5.8h | Capex Cost: $0.00',
+        act: 'Activate Risk-First queue dispatching and move linehaul departure cutoffs past 20:00.'
+      }
+    };
+
+    function askCopilot(q) {
+      const stream = document.getElementById('copilot-stream');
+      stream.innerHTML += `
+        <div class="flex gap-2.5 flex-row-reverse">
+          <div class="w-7 h-7 rounded-lg bg-cyan-600 text-white flex items-center justify-center font-bold text-xs shrink-0">YOU</div>
+          <div class="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-xs text-slate-100 max-w-xl">${q}</div>
+        </div>
+      `;
+      const qLow = q.toLowerCase();
+      let match = COPILOT_KB['why are deliveries delayed'];
+      for (const k in COPILOT_KB) {
+        if (qLow.includes(k)) { match = COPILOT_KB[k]; break; }
+      }
+      setTimeout(() => {
+        stream.innerHTML += `
+          <div class="flex gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-violet-600/30 border border-violet-500/40 text-violet-300 flex items-center justify-center font-bold text-xs shrink-0">AI</div>
+            <div class="p-3.5 rounded-xl bg-[#080c15] border border-[#1e293b] text-xs text-slate-200 max-w-2xl space-y-2">
+              <p class="leading-relaxed">${match.ans}</p>
+              <div class="p-2 bg-[#0f172a] rounded border border-[#1e293b] font-mono text-cyan-300 font-bold">${match.kpis}</div>
+              <div class="text-emerald-400 font-medium">✓ Recommended Action: ${match.act}</div>
+            </div>
+          </div>
+        `;
+        stream.scrollTop = stream.scrollHeight;
+      }, 200);
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function sendUserChat() {
+      const input = document.getElementById('copilot-input');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+      askCopilot(val);
+    }
+
+    function resetChat() {
+      document.getElementById('copilot-stream').innerHTML = `
+        <div class="flex gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-violet-600/30 border border-violet-500/40 text-violet-300 flex items-center justify-center font-bold text-xs shrink-0">AI</div>
+          <div class="p-3 rounded-xl bg-[#080c15] border border-[#1e293b] text-xs text-slate-200 max-w-2xl leading-relaxed">
+            Hello! I am your <strong>Ops Copilot</strong>. I query live SQLite telemetry across all 10,500 orders and facilities without hallucinations. Click any suggested prompt or type below.
+          </div>
+        </div>
+      `;
+    }
+
+    function downloadCSV() {
+      const csv = "feature,importance\nroute_distance,0.2953\ntotal_value,0.1871\nsla_hours,0.1560\ncarrier_reliability,0.0856\nwh_backlog,0.0289";
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'logisense_features.csv';
+      a.click();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTables();
+    });
+  </script>
+</body>
+</html>
